@@ -20,7 +20,8 @@ public class SecurityConfig {
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
-            .csrf().disable() 
+            .csrf().disable()
+            .cors().and() 
             .authorizeHttpRequests(auth -> auth
                 .requestMatchers("/api/auth/signup", "/api/auth/login").permitAll() // Allow public access to these endpoints
                 .anyRequest().authenticated() 
