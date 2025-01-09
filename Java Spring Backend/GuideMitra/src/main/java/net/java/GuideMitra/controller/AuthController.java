@@ -12,9 +12,9 @@ import net.java.GuideMitra.dto.SignupRequest;
 import net.java.GuideMitra.entity.User;
 import net.java.GuideMitra.service.UserService;
 
+@CrossOrigin(origins = "https://guide-mitra.vercel.app", allowedHeaders = "*", methods = { RequestMethod.GET, RequestMethod.POST, RequestMethod.OPTIONS })
 @RestController
 @RequestMapping("/api/auth")
-@CrossOrigin(origins = "https://guide-mitra.vercel.app", allowedHeaders = "*", methods = { RequestMethod.GET, RequestMethod.POST, RequestMethod.OPTIONS })
 public class AuthController {
 
     @Autowired

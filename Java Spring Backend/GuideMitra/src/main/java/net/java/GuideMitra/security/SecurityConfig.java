@@ -17,17 +17,15 @@ public class SecurityConfig {
         return new BCryptPasswordEncoder();
     }
 
+
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
             .csrf().disable()
-            .cors().and() 
             .authorizeHttpRequests(auth -> auth
-                .requestMatchers("/api/auth/signup", "/api/auth/login").permitAll() // Allow public access to these endpoints
-                .anyRequest().authenticated() 
-                )
-            .formLogin().disable() 
-            .httpBasic().disable(); 
+                .anyRequest().permitAll()) // Temporarily allow all requests
+            .httpBasic().disable();
         return http.build();
     }
 }
+
