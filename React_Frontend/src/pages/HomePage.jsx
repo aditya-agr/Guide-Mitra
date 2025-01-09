@@ -24,15 +24,15 @@ const HomePage = () => {
   };
 
   return (
-    <div className="bg-darkBg min-h-screen flex flex-col justify-between">
+    <div className="bg-darkBg min-h-screen flex flex-col">
       <Header />
 
-      <div className="relative h-full flex">
+      <div className="relative h-full flex flex-col lg:flex-row">
         {/* Left Panel for Translated Text */}
         {translatedText && (
-          <div className="absolute left-20 top-1/4 w-1/4 bg-gray-600/25 text-white p-4 border-r border-gray-700 flex flex-col justify-center items-center z-50">
+          <div className="absolute left-5 top-1/4 w-11/12 md:w-2/3 lg:w-1/4 bg-gray-600/25 text-white p-4 border-r border-gray-700 flex flex-col justify-center items-center z-50">
             <h2 className="text-lg font-bold mb-4">Guidance</h2>
-            <p className="text-base text-gray-300 overflow-y-auto max-h-[80%] text-center">
+            <p className="text-sm md:text-base text-gray-300 overflow-y-auto max-h-[80%] text-center">
               {translatedText}
             </p>
           </div>
@@ -44,8 +44,7 @@ const HomePage = () => {
           {isAuthenticated && (
             <button
               onClick={handleCameraClick}
-              
-              className="absolute bottom-12 left-2/2 text-4xl bg-gray-600/50 text-white px-6 py-3 rounded-full shadow-lg hover:bg-blue-500 focus:outline-none"
+              className="absolute bottom-6 md:bottom-12 left-1/2 transform -translate-x-1/2 text-xl md:text-2xl lg:text-4xl bg-gray-600/50 text-white px-4 py-2 md:px-6 md:py-3 rounded-full shadow-lg hover:bg-blue-500 focus:outline-none"
             >
               📸
             </button>
@@ -55,7 +54,7 @@ const HomePage = () => {
 
       {/* Upload Form */}
       {showUploadForm && (
-        <div className="fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center">
+        <div className="fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center p-4">
           <UploadForm
             closeForm={() => setShowUploadForm(false)}
             onResponse={handleResponse}
@@ -70,3 +69,52 @@ const HomePage = () => {
 };
 
 export default HomePage;
+
+
+// return (
+//   <div className="bg-darkBg min-h-screen flex flex-col justify-between">
+//     <Header />
+
+//     <div className="relative h-full flex">
+//       {/* Left Panel for Translated Text */}
+//       {translatedText && (
+//         <div className="absolute left-20 top-1/4 w-1/4 bg-gray-600/25 text-white p-4 border-r border-gray-700 flex flex-col justify-center items-center z-50">
+//           <h2 className="text-lg font-bold mb-4">Guidance</h2>
+//           <p className="text-base text-gray-300 overflow-y-auto max-h-[80%] text-center">
+//             {translatedText}
+//           </p>
+//         </div>
+//       )}
+
+//       {/* Globe */}
+//       <div className="flex-1 relative flex items-center justify-center">
+//         <Globe />
+//         {isAuthenticated && (
+//           <button
+//             onClick={handleCameraClick}
+            
+//             className="absolute bottom-12 left-2/2 text-4xl bg-gray-600/50 text-white px-6 py-3 rounded-full shadow-lg hover:bg-blue-500 focus:outline-none"
+//           >
+//             📸
+//           </button>
+//         )}
+//       </div>
+//     </div>
+
+//     {/* Upload Form */}
+//     {showUploadForm && (
+//       <div className="fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center">
+//         <UploadForm
+//           closeForm={() => setShowUploadForm(false)}
+//           onResponse={handleResponse}
+//           onAudioEnd={clearTranslatedText}
+//         />
+//       </div>
+//     )}
+
+//     <Footer />
+//   </div>
+// );
+// };
+
+  
