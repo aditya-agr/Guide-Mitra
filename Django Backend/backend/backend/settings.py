@@ -25,10 +25,9 @@ SECRET_KEY = 'django-insecure-acn@ku$h*&y@l0%d9xeyd3x!vzgb2g$jl4npy7fc92zk5_+#2h
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ['your-app.onrender.com', 'localhost']
-
+ALLOWED_HOSTS = ['guide-mitra-py.onrender.com', 'localhost']
 CSRF_TRUSTED_ORIGINS = [
-    "https://your-app.onrender.com",
+    "https://guide-mitra-py.onrender.com",
     "http://localhost:3000"
 ]  # Adjust if necessary
 CSRF_COOKIE_SECURE = False

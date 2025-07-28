@@ -8,7 +8,7 @@ import { AuthContext } from '../context/AuthContext';
 const HomePage = () => {
   const { isAuthenticated } = useContext(AuthContext);
   // const { isAuthenticated} = useState(true);
-  const [showUploadForm, setShowUploadForm] = useState(true);
+  const [showUploadForm, setShowUploadForm] = useState(false);
   const [translatedText, setTranslatedText] = useState('');
 
   const handleResponse = (response) => {
