@@ -11,10 +11,10 @@ from django.core.files.storage import default_storage
 from googletrans import Translator
 import os
 
-key = os.getenv("GEMINI_API")
+# key = os.getenv("GEMINI_API")
 
 # Configure Gemini API
-configure(api_key=key)
+configure(api_key="AIzaSyCnLGA8_7B9j2IsfOh_EdLVYDbv2laPfvs")
 model = GenerativeModel(model_name="gemini-1.5-pro")
 
 # Define the view
