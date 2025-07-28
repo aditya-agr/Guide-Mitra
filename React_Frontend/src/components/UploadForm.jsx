@@ -3,7 +3,7 @@ import { motion } from 'framer-motion';
 
 const UploadForm = ({ closeForm, onResponse }) => {
   const [file, setFile] = useState(null);
-  const [showCamera, setShowCamera] = useState(true);
+  const [showCamera, setShowCamera] = useState(false);
   const [capturedPhoto, setCapturedPhoto] = useState(null);
   const videoRef = useRef(null);
   const canvasRef = useRef(null);
