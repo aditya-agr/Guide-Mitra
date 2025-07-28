@@ -5,7 +5,7 @@ export const AuthContext = createContext();
 
 // Create a provider component
 const AuthProvider = ({ children }) => {
-  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [isAuthenticated, setIsAuthenticated] = useState(true);
 
   // Check if user is logged in by reading from local storage (optional)
   useEffect(() => {

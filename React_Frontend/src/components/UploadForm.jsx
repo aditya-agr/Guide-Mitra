@@ -3,7 +3,7 @@ import { motion } from 'framer-motion';
 
 const UploadForm = ({ closeForm, onResponse }) => {
   const [file, setFile] = useState(null);
-  const [showCamera, setShowCamera] = useState(false);
+  const [showCamera, setShowCamera] = useState(true);
   const [capturedPhoto, setCapturedPhoto] = useState(null);
   const videoRef = useRef(null);
   const canvasRef = useRef(null);
@@ -74,7 +74,7 @@ const UploadForm = ({ closeForm, onResponse }) => {
   
     closeForm();
     try {
-      const response = await fetch('http://guide-mitra-py.onrender.com:10000/api/process-image/', {
+      const response = await fetch('http://127.0.0.1:8000/api/process-image/', {
         method: 'POST',
         body: formData,
       });
