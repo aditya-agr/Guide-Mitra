@@ -27,7 +27,7 @@ DEBUG = False
 
 ALLOWED_HOSTS = ['your-app.onrender.com', 'localhost']
 
-CSRF_TRUSTED_ORIGINS = ['http://localhost:8000']  # Adjust if necessary
+CSRF_TRUSTED_ORIGINS = ['*']  # Adjust if necessary
 CSRF_COOKIE_SECURE = False
 
 

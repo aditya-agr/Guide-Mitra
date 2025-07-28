@@ -9,9 +9,12 @@ from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 from django.core.files.storage import default_storage
 from googletrans import Translator
+import os
+
+key = os.getenv("GEMINI_API")
 
 # Configure Gemini API
-configure(api_key="AIzaSyCsqbXw-jCFIyRr-h2LeDleu_xWvqkrgFc")
+configure(api_key=key)
 model = GenerativeModel(model_name="gemini-1.5-pro")
 
 # Define the view
