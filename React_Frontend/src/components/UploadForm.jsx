@@ -74,7 +74,7 @@ const UploadForm = ({ closeForm, onResponse }) => {
   
     closeForm();
     try {
-      const response = await fetch('https://guide-mitra-py.onrender.com/api/process-image/', {
+      const response = await fetch('https://guide-mitra-production.up.railway.app/api/process-image/', {
         method: 'POST',
         body: formData,
       });

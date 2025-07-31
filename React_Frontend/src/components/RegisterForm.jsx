@@ -27,7 +27,7 @@ const RegisterForm = () => {
     // Send login request to backend (e.g., using fetch or axios)
     try {
       // Example API call to backend (replace with actual backend URL and logic)
-      const response = await fetch('https://guide-mitra.onrender.com/api/auth/signup', {
+      const response = await fetch('https://guide-mitra-production-ad26.up.railway.app/api/auth/signup', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
