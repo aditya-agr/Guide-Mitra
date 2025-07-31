@@ -28,7 +28,7 @@ DEBUG = True
 ALLOWED_HOSTS = ['guide-mitra-py.onrender.com', 'localhost']
 CSRF_TRUSTED_ORIGINS = [
     "https://guide-mitra-py.onrender.com",
-    "https://guide-mitra-production.up.railway.app".
+    "https://guide-mitra-production.up.railway.app",
     "http://localhost:3000"
 ]  # Adjust if necessary
 CSRF_COOKIE_SECURE = False
