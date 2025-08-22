@@ -57,8 +57,10 @@ def process_image(request):
             mp3_buffer.seek(0) 
             mp3_path = default_storage.save("output/output.mp3", mp3_buffer)
             
+            print("TTS completed.")
             with default_storage.open(mp3_path, 'rb') as mp3_file:
                 mp3_data = base64.b64encode(mp3_file.read()).decode('utf-8')
+            print("Loading completed.")
 
             # Cleanup temporary files
             default_storage.delete(image_path)
