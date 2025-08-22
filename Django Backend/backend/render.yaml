@@ -5,3 +5,8 @@ services:
     pythonVersion: 3.11.9
     buildCommand: pip install -r requirements.txt && python manage.py collectstatic --noinput
     startCommand: gunicorn backend.wsgi
+    autoDeploy: true
+    plan: free
+    envVars:
+      - key: PORT
+        value: 10000
