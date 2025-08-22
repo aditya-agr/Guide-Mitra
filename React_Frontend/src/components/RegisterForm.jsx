@@ -2,6 +2,8 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 
+const baseURL = import.meta.env.BASE_URL;
+
 const RegisterForm = () => {
   const [formData, setFormData] = useState({
     name: '',
@@ -27,7 +29,7 @@ const RegisterForm = () => {
     // Send login request to backend (e.g., using fetch or axios)
     try {
       // Example API call to backend (replace with actual backend URL and logic)
-      const response = await fetch('https://guide-mitra-production-ad26.up.railway.app/api/auth/signup', {
+      const response = await fetch(`${baseURL}/api/auth/signup`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

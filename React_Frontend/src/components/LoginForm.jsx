@@ -4,6 +4,8 @@ import { useContext } from 'react';
 import { AuthContext } from '../context/AuthContext';
 import { useNavigate } from 'react-router-dom';
 
+const baseURL = import.meta.env.BASE_URL;
+
 const LoginForm = () => {
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
@@ -23,7 +25,7 @@ const LoginForm = () => {
     // Send login request to backend (e.g., using fetch or axios)
     try {
       // Example API call to backend (replace with actual backend URL and logic)
-      const response = await fetch('https://guide-mitra-production-ad26.up.railway.app/api/auth/login', {
+      const response = await fetch(`${baseURL}/api/auth/login`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

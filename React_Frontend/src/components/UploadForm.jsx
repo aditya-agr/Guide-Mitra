@@ -1,6 +1,8 @@
 import React, { useState, useRef } from 'react';
 import { motion } from 'framer-motion';
 
+const apiURL = import.meta.env.API_URL;
+
 const UploadForm = ({ closeForm, onResponse }) => {
   const [file, setFile] = useState(null);
   const [showCamera, setShowCamera] = useState(false);
@@ -74,7 +76,7 @@ const UploadForm = ({ closeForm, onResponse }) => {
   
     closeForm();
     try {
-      const response = await fetch('https://guide-mitra-production.up.railway.app/api/process-image/', {
+      const response = await fetch(`${apiURL}/api/process-image/`, {
         method: 'POST',
         body: formData,
       });
