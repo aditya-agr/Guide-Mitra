@@ -2,6 +2,7 @@ services:
   - type: web
     name: guide-mitra-py
     env: python
+    rootDir: Backend/backend
     pythonVersion: 3.11.9
     buildCommand: pip install -r requirements.txt && python manage.py collectstatic --noinput
     startCommand: gunicorn backend.wsgi
