@@ -1,7 +1,7 @@
 import React, { useState, useRef } from 'react';
 import { motion } from 'framer-motion';
 
-const apiURL = import.meta.env.API_URL;
+const apiURL = import.meta.env.VITE_API_URL;
 
 const UploadForm = ({ closeForm, onResponse }) => {
   const [file, setFile] = useState(null);
