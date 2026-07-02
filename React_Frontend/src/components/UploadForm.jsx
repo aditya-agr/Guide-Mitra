@@ -1,23 +1,41 @@
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { motion } from 'framer-motion';
 
 const apiURL = import.meta.env.VITE_API_URL;
 
-const UploadForm = ({ closeForm, onResponse }) => {
+const UploadForm = ({ closeForm, onSubmitStart, onResult, onError }) => {
   const [file, setFile] = useState(null);
+  const [previewUrl, setPreviewUrl] = useState(null);
   const [showCamera, setShowCamera] = useState(false);
-  const [capturedPhoto, setCapturedPhoto] = useState(null);
+  const [cameraError, setCameraError] = useState('');
   const videoRef = useRef(null);
   const canvasRef = useRef(null);
 
+  useEffect(() => {
+    return () => {
+      stopCamera();
+      if (previewUrl && !previewUrl.startsWith('data:')) URL.revokeObjectURL(previewUrl);
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  const setPreview = (url) => {
+    if (previewUrl && !previewUrl.startsWith('data:')) URL.revokeObjectURL(previewUrl);
+    setPreviewUrl(url);
+  };
+
   const handleFileChange = (e) => {
-    setFile(e.target.files[0]);
+    const selected = e.target.files[0];
+    if (!selected) return;
+    setFile(selected);
+    setPreview(URL.createObjectURL(selected));
   };
 
   const openCamera = () => {
+    setCameraError('');
     setShowCamera(true);
     navigator.mediaDevices
-      .getUserMedia({ video: true })
+      .getUserMedia({ video: { facingMode: 'environment' } })
       .then((stream) => {
         if (videoRef.current) {
           videoRef.current.srcObject = stream;
@@ -26,6 +44,8 @@ const UploadForm = ({ closeForm, onResponse }) => {
       })
       .catch((err) => {
         console.error('Error accessing camera:', err);
+        setShowCamera(false);
+        setCameraError('Could not access the camera. Please allow camera permission or upload a photo instead.');
       });
   };
 
@@ -39,188 +59,149 @@ const UploadForm = ({ closeForm, onResponse }) => {
       canvas.height = video.videoHeight;
       context.drawImage(video, 0, 0, canvas.width, canvas.height);
       const dataUrl = canvas.toDataURL('image/png');
-      setCapturedPhoto(dataUrl);
-      setFile(dataUrl); // Convert captured photo to file equivalent
+      setFile(dataUrl); // Captured photo kept as data URL
+      setPreview(dataUrl);
       stopCamera();
     }
   };
 
   const stopCamera = () => {
     const stream = videoRef.current?.srcObject;
-    const tracks = stream?.getTracks();
-
-    if (tracks) {
-      tracks.forEach((track) => track.stop());
-    }
+    stream?.getTracks().forEach((track) => track.stop());
     setShowCamera(false);
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-  
-    if (!file) {
-      alert('Please select or capture a photo.');
-      return;
-    }
-  
+    if (!file) return;
+
     const formData = new FormData();
-  
     if (typeof file === 'string') {
-      // If the file is a captured photo (data URL)
       const blob = await fetch(file).then((res) => res.blob());
       formData.append('image', blob, 'captured-photo.png');
     } else {
-      // If the file is from input
       formData.append('image', file);
     }
-  
+
+    onSubmitStart?.();
     closeForm();
+
     try {
       const response = await fetch(`${apiURL}/api/process-image/`, {
         method: 'POST',
         body: formData,
       });
-  
+
       if (response.ok) {
         const data = await response.json();
-        const { translated_text, mp3 } = data;
-  
-        if (typeof onResponse === 'function') {
-          onResponse(data);
-        }
-        // Decode Base64 MP3
-        const binaryString = atob(mp3);
-        const binaryLength = binaryString.length;
-        const binaryArray = new Uint8Array(binaryLength);
-        for (let i = 0; i < binaryLength; i++) {
-          binaryArray[i] = binaryString.charCodeAt(i);
-        }
-  
-        // Create a Blob from the binary data
-        const audioBlob = new Blob([binaryArray], { type: 'audio/mpeg' });
-  
-        // Create an Object URL and play the audio
-        const audioUrl = URL.createObjectURL(audioBlob);
-        const audio = new Audio(audioUrl);
-        audio.play();
-  
-        // Display translated text
-        console.log('Translated Text:', translated_text);
-        audio.addEventListener("ended", () => {
-          if (typeof onResponse === "function") {
-            onResponse({ translated_text: "" }); // Clear text
-          }
-        });
+        onResult?.(data);
       } else {
-        alert('Failed to process the photo. Please try again.');
+        onError?.('We could not process that photo. Please try again with a clearer picture.');
       }
     } catch (error) {
       console.error('Error submitting the form:', error);
-      alert('An error occurred while processing the photo.');
+      onError?.('Something went wrong while contacting the server. Please try again.');
     }
   };
-  
 
   return (
     <motion.div
-      initial={{ opacity: 0, scale: 0.8 }}
-      animate={{ opacity: 1, scale: 1 }}
-      exit={{ opacity: 0, scale: 0.8 }}
-      transition={{ duration: 0.6, ease: 'easeOut' }}
-      className="bg-gray-800 p-8 rounded-lg shadow-lg w-96 text-white transform hover:scale-105 transition-transform"
+      initial={{ opacity: 0, scale: 0.9, y: 20 }}
+      animate={{ opacity: 1, scale: 1, y: 0 }}
+      exit={{ opacity: 0, scale: 0.9, y: 20 }}
+      transition={{ duration: 0.3, ease: 'easeOut' }}
+      className="bg-gray-900 border border-white/10 p-6 md:p-8 rounded-2xl shadow-2xl w-full max-w-md text-white"
     >
-      <motion.h2
-        initial={{ y: -20, opacity: 0 }}
-        animate={{ y: 0, opacity: 1 }}
-        transition={{ delay: 0.1, duration: 0.5 }}
-        className="text-xl font-bold mb-6"
-      >
-        Upload or Capture Photo
-      </motion.h2>
+      <div className="flex items-center justify-between mb-2">
+        <h2 className="text-xl font-bold">Identify a Monument</h2>
+        <button
+          type="button"
+          onClick={closeForm}
+          aria-label="Close"
+          className="text-gray-400 hover:text-white transition-colors text-2xl leading-none"
+        >
+          &times;
+        </button>
+      </div>
+      <p className="text-sm text-gray-400 mb-6">
+        Upload or capture a photo and we&apos;ll tell you its story.
+      </p>
 
       <form onSubmit={handleSubmit}>
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.2, duration: 0.5 }}
-          className="mb-4"
-        >
-          <input
-            type="file"
-            accept="image/*"
-            onChange={handleFileChange}
-            className="w-full text-gray-300 file:bg-blue-600 file:text-white file:px-4 file:py-2 file:rounded file:cursor-pointer"
-          />
-        </motion.div>
+        {/* File upload */}
+        <label className="block border-2 border-dashed border-white/20 hover:border-blue-500 rounded-xl p-4 text-center cursor-pointer transition-colors mb-4">
+          <input type="file" accept="image/*" onChange={handleFileChange} className="hidden" />
+          {previewUrl ? (
+            <img
+              src={previewUrl}
+              alt="Selected preview"
+              className="mx-auto max-h-40 rounded-lg object-contain"
+            />
+          ) : (
+            <div className="py-4">
+              <span className="text-3xl block mb-2" aria-hidden="true">🖼️</span>
+              <span className="text-sm text-gray-300">Click to choose a photo</span>
+            </div>
+          )}
+        </label>
 
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.3, duration: 0.5 }}
-          className="flex justify-between items-center mb-4"
-        >
+        <div className="flex items-center gap-3 mb-4 text-gray-500 text-xs">
+          <span className="flex-1 h-px bg-white/10" />
+          OR
+          <span className="flex-1 h-px bg-white/10" />
+        </div>
+
+        {!showCamera && (
           <button
             type="button"
             onClick={openCamera}
-            className="bg-blue-600 px-4 py-2 rounded hover:bg-blue-500"
+            className="w-full flex items-center justify-center gap-2 bg-white/10 hover:bg-white/20 px-4 py-3 rounded-xl transition-colors mb-4"
           >
-            Click Photo
+            <span aria-hidden="true">📷</span> Use camera
           </button>
-          {capturedPhoto && (
-            <img
-              src={capturedPhoto}
-              alt="Captured"
-              className="w-16 h-16 rounded border border-gray-300"
-            />
-          )}
-        </motion.div>
-
-        {showCamera && (
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.4, duration: 0.5 }}
-            className="mb-4"
-          >
-            <video ref={videoRef} className="w-full rounded mb-2" autoPlay />
-            <canvas ref={canvasRef} className="hidden" />
-            <button
-              type="button"
-              onClick={capturePhoto}
-              className="bg-green-500 px-4 py-2 rounded hover:bg-green-400"
-            >
-              Capture
-            </button>
-            <button
-              type="button"
-              onClick={stopCamera}
-              className="bg-red-500 px-4 py-2 rounded hover:bg-red-400 ml-2"
-            >
-              Close Camera
-            </button>
-          </motion.div>
         )}
 
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.5, duration: 0.5 }}
-          className="flex justify-between"
-        >
+        {cameraError && <p className="text-red-400 text-sm mb-4">{cameraError}</p>}
+
+        {showCamera && (
+          <div className="mb-4">
+            <video ref={videoRef} className="w-full rounded-xl mb-3" autoPlay playsInline muted />
+            <canvas ref={canvasRef} className="hidden" />
+            <div className="flex gap-2">
+              <button
+                type="button"
+                onClick={capturePhoto}
+                className="flex-1 bg-green-600 hover:bg-green-500 px-4 py-2 rounded-lg font-medium transition-colors"
+              >
+                Capture
+              </button>
+              <button
+                type="button"
+                onClick={stopCamera}
+                className="flex-1 bg-white/10 hover:bg-white/20 px-4 py-2 rounded-lg transition-colors"
+              >
+                Close camera
+              </button>
+            </div>
+          </div>
+        )}
+
+        <div className="flex gap-3 mt-2">
           <button
             type="button"
             onClick={closeForm}
-            className="bg-red-500 px-4 py-2 rounded hover:bg-red-400 transition-transform transform hover:scale-110"
+            className="flex-1 px-4 py-3 rounded-xl border border-white/20 text-gray-300 hover:bg-white/10 transition-colors"
           >
             Cancel
           </button>
           <button
             type="submit"
-            className="bg-green-500 px-4 py-2 rounded hover:bg-green-400 transition-transform transform hover:scale-110"
+            disabled={!file}
+            className="flex-1 px-4 py-3 rounded-xl bg-blue-600 font-semibold hover:bg-blue-500 transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
           >
-            Submit
+            Tell me the story
           </button>
-        </motion.div>
+        </div>
       </form>
     </motion.div>
   );

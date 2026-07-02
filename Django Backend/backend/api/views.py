@@ -15,7 +15,7 @@ key = os.getenv("GEMINI_API")
 
 # Configure Gemini API
 configure(api_key=key)
-model = GenerativeModel(model_name="gemini-1.5-flash-latest")
+model = GenerativeModel(model_name="gemini-2.5-flash")
 
 # Define the view
 from .utils import translate_to_hindi

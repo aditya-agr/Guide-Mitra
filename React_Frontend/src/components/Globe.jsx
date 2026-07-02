@@ -27,7 +27,7 @@ const RotatingGlobe = () => {
 
 const Globe = () => {
   return (
-    <Canvas style={{ height: '100vh', background: 'black' }}>
+    <Canvas style={{ height: '100%', width: '100%', background: 'black' }}>
       <ambientLight intensity={1} />
       <pointLight position={[10, 10, 10]} />
       <Stars radius={100} depth={50} count={5000} factor={4} saturation={0} fade />

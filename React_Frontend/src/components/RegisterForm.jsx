@@ -1,8 +1,18 @@
-// RegisterForm.jsx
 import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
 
 const baseURL = import.meta.env.VITE_BASE_URL;
+
+const inputClass =
+  'w-full px-4 py-2.5 bg-gray-700/70 text-white rounded-lg border border-transparent placeholder-gray-400 focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-colors';
+
+const fields = [
+  { name: 'name', label: 'Name', type: 'text', placeholder: 'Your full name', autoComplete: 'name' },
+  { name: 'username', label: 'Username', type: 'text', placeholder: 'Choose a username', autoComplete: 'username' },
+  { name: 'password', label: 'Password', type: 'password', placeholder: 'Choose a password', autoComplete: 'new-password' },
+  { name: 'languagePreference', label: 'Language Preference', type: 'text', placeholder: 'e.g. Hindi', autoComplete: 'off' },
+  { name: 'country', label: 'Country', type: 'text', placeholder: 'e.g. India', autoComplete: 'country-name' },
+];
 
 const RegisterForm = () => {
   const [formData, setFormData] = useState({
@@ -10,25 +20,27 @@ const RegisterForm = () => {
     username: '',
     password: '',
     languagePreference: '',
-    country: ''
+    country: '',
   });
   const [error, setError] = useState('');
+  const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
+
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    
+
     if (!formData.name || !formData.username || !formData.password) {
       setError('Please fill in all required fields.');
       return;
     }
-    console.log(formData);
-    // Send login request to backend (e.g., using fetch or axios)
+
+    setError('');
+    setLoading(true);
     try {
-      // Example API call to backend (replace with actual backend URL and logic)
       const response = await fetch(`${baseURL}/api/auth/signup`, {
         method: 'POST',
         headers: {
@@ -38,85 +50,61 @@ const RegisterForm = () => {
       });
 
       if (!response.ok) {
-        setError('Invalid credentials. Please try again.');
+        setError('Registration failed. That username may already be taken.');
       } else {
-        // Handle successful login (redirect or update UI)
-        console.log('Registration successful');
-        navigate("/");
+        navigate('/login');
       }
     } catch (error) {
       setError('An error occurred. Please try again later.');
+    } finally {
+      setLoading(false);
     }
   };
 
   return (
     <form className="space-y-4" onSubmit={handleSubmit}>
-      <div>
-        <label className="text-white block mb-1">Name</label>
-        <input
-          type="text"
-          name="name"
-          value={formData.name}
-          onChange={handleChange}
-          className="w-full px-3 py-2 rounded-lg bg-gray-700 text-white focus:outline-none"
-          required
-        />
-      </div>
+      {fields.map((field) => (
+        <div key={field.name} className="space-y-1.5">
+          <label htmlFor={field.name} className="block text-sm text-gray-300">
+            {field.label}
+          </label>
+          <input
+            id={field.name}
+            type={field.type}
+            name={field.name}
+            value={formData[field.name]}
+            onChange={handleChange}
+            placeholder={field.placeholder}
+            autoComplete={field.autoComplete}
+            className={inputClass}
+            required
+          />
+        </div>
+      ))}
 
-      <div>
-        <label className="text-white block mb-1">Username</label>
-        <input
-          type="text"
-          name="username"
-          value={formData.username}
-          onChange={handleChange}
-          className="w-full px-3 py-2 rounded-lg bg-gray-700 text-white focus:outline-none"
-          required
-        />
-      </div>
-
-      <div>
-        <label className="text-white block mb-1">Password</label>
-        <input
-          type="password"
-          name="password"
-          value={formData.password}
-          onChange={handleChange}
-          className="w-full px-3 py-2 rounded-lg bg-gray-700 text-white focus:outline-none"
-          required
-        />
-      </div>
-
-      <div>
-        <label className="text-white block mb-1">Language Preference</label>
-        <input
-          type="text"
-          name="languagePreference"
-          value={formData.languagePreference}
-          onChange={handleChange}
-          className="w-full px-3 py-2 rounded-lg bg-gray-700 text-white focus:outline-none"
-          required
-        />
-      </div>
-
-      <div>
-        <label className="text-white block mb-1">Country</label>
-        <input
-          type="text"
-          name="country"
-          value={formData.country}
-          onChange={handleChange}
-          className="w-full px-3 py-2 rounded-lg bg-gray-700 text-white focus:outline-none"
-          required
-        />
-      </div>
+      {error && (
+        <div className="text-red-400 text-sm bg-red-500/10 border border-red-500/30 rounded-lg px-3 py-2">
+          {error}
+        </div>
+      )}
 
       <button
         type="submit"
-        className="w-full py-2 px-4 rounded-lg bg-blue-600 text-white font-semibold hover:bg-blue-500 focus:outline-none"
+        disabled={loading}
+        className="w-full py-2.5 px-4 rounded-lg bg-blue-600 text-white font-semibold hover:bg-blue-500 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
       >
-        Register
+        {loading && (
+          <span className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+        )}
+        {loading ? 'Creating account…' : 'Register'}
       </button>
+
+      <p className="text-center text-sm text-gray-400">
+        Already have an account?{' '}
+        <Link to="/login" className="text-blue-400 hover:text-blue-300 transition-colors">
+          Login
+        </Link>
+      </p>
     </form>
   );
 };

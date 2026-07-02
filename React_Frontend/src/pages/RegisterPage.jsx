@@ -6,29 +6,25 @@ import Header from '../components/Header';
 
 const RegisterPage = () => {
   return (
-    <div className="bg-black h-screen flex flex-col justify-between">
+    <div className="bg-black min-h-screen flex flex-col">
       <Header />
 
-    <div className="p-8 flex items-center justify-center bg-black">
-      <motion.div
-        initial={{ opacity: 0, scale: 0.8, y: -50 }}
-        animate={{ opacity: 1, scale: 1, y: 0 }}
-        transition={{ duration: 0.8, ease: 'easeOut' }}
-        className="w-full max-w-md p-8 space-y-6 bg-gray-800 rounded-lg shadow-lg"
-      >
-        <motion.h2
-          initial={{ opacity: 0, y: -20 }}
+      <main className="flex-grow flex items-center justify-center px-4 py-12">
+        <motion.div
+          initial={{ opacity: 0, y: 30 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.2, duration: 0.6 }}
-          className="text-3xl font-extrabold text-white text-center"
+          transition={{ duration: 0.6, ease: 'easeOut' }}
+          className="w-full max-w-md p-8 space-y-6 bg-gray-800/80 backdrop-blur rounded-2xl border border-white/10 shadow-2xl"
         >
-          Create Your Account
-        </motion.h2>
-        <RegisterForm />
-      </motion.div>
-    </div>
+          <div className="text-center space-y-2">
+            <h2 className="text-3xl font-extrabold text-white">Create your account</h2>
+            <p className="text-sm text-gray-400">Join Guide Mitra and explore the world&apos;s stories</p>
+          </div>
+          <RegisterForm />
+        </motion.div>
+      </main>
 
-    <Footer />
+      <Footer />
     </div>
   );
 };

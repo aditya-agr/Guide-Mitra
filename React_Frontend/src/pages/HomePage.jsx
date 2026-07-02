@@ -1,4 +1,6 @@
-import React, { useState, useContext } from 'react';
+import React, { useState, useContext, useRef, useEffect } from 'react';
+import { Link } from 'react-router-dom';
+import { motion, AnimatePresence } from 'framer-motion';
 import Globe from '../components/Globe';
 import Header from '../components/Header';
 import Footer from '../components/Footer';
@@ -7,61 +9,197 @@ import { AuthContext } from '../context/AuthContext';
 
 const HomePage = () => {
   const { isAuthenticated } = useContext(AuthContext);
-  // const { isAuthenticated} = useState(true);
   const [showUploadForm, setShowUploadForm] = useState(false);
+  const [isProcessing, setIsProcessing] = useState(false);
   const [translatedText, setTranslatedText] = useState('');
+  const [error, setError] = useState('');
+  const audioRef = useRef(null);
+  const audioUrlRef = useRef(null);
 
-  const handleResponse = (response) => {
-    setTranslatedText(response.translated_text); // Set translated text from backend response
+  useEffect(() => {
+    return () => {
+      audioRef.current?.pause();
+      if (audioUrlRef.current) URL.revokeObjectURL(audioUrlRef.current);
+    };
+  }, []);
+
+  const handleResult = ({ translated_text, mp3 }) => {
+    setIsProcessing(false);
+    setTranslatedText(translated_text);
+
+    // Decode the Base64 MP3 into a playable audio object
+    const binaryString = atob(mp3);
+    const bytes = new Uint8Array(binaryString.length);
+    for (let i = 0; i < binaryString.length; i++) {
+      bytes[i] = binaryString.charCodeAt(i);
+    }
+    const audioBlob = new Blob([bytes], { type: 'audio/mpeg' });
+
+    audioRef.current?.pause();
+    if (audioUrlRef.current) URL.revokeObjectURL(audioUrlRef.current);
+    audioUrlRef.current = URL.createObjectURL(audioBlob);
+    audioRef.current = new Audio(audioUrlRef.current);
+    audioRef.current.play().catch(() => {});
   };
 
-  const clearTranslatedText = () => {
-    setTranslatedText(''); // Clear text after audio playback
+  const handleError = (message) => {
+    setIsProcessing(false);
+    setError(message);
   };
 
-  const handleCameraClick = () => {
-    setShowUploadForm(true);
+  const replayAudio = () => {
+    if (audioRef.current) {
+      audioRef.current.currentTime = 0;
+      audioRef.current.play().catch(() => {});
+    }
+  };
+
+  const closeResult = () => {
+    audioRef.current?.pause();
+    setTranslatedText('');
   };
 
   return (
-    <div className="bg-darkBg min-h-screen flex flex-col">
+    <div className="bg-black min-h-screen flex flex-col">
       <Header />
 
-      <div className="relative h-full flex flex-col lg:flex-row">
-        {/* Left Panel for Translated Text */}
-        {translatedText && (
-          <div className="absolute left-5 top-1/4 w-11/12 md:w-2/3 lg:w-1/4 bg-gray-600/25 text-white p-4 border-r border-gray-700 flex flex-col justify-center items-center z-50">
-            <h2 className="text-lg font-bold mb-4">Guidance</h2>
-            <p className="text-sm md:text-base text-gray-300 overflow-y-auto max-h-[80%] text-center">
-              {translatedText}
-            </p>
-          </div>
-        )}
-
-        {/* Globe */}
-        <div className="flex-1 relative flex items-center justify-center">
+      <main className="flex-1 relative">
+        {/* Globe background */}
+        <div className="absolute inset-0">
           <Globe />
-          {isAuthenticated && (
-            <button
-              onClick={handleCameraClick}
-              className="absolute bottom-6 md:bottom-12 left-1/2 transform -translate-x-1/2 text-xl md:text-2xl lg:text-4xl bg-gray-600/50 text-white px-4 py-2 md:px-6 md:py-3 rounded-full shadow-lg hover:bg-blue-500 focus:outline-none"
+        </div>
+
+        {/* Hero */}
+        <div className="relative z-10 flex flex-col items-center pt-10 md:pt-16 px-4 text-center pointer-events-none">
+          <motion.h1
+            initial={{ opacity: 0, y: -20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.8 }}
+            className="text-3xl md:text-5xl font-extrabold text-white drop-shadow-lg"
+          >
+            Your AI Tour Guide
+          </motion.h1>
+          <motion.p
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ delay: 0.3, duration: 0.8 }}
+            className="mt-3 max-w-xl text-sm md:text-lg text-gray-300"
+          >
+            Snap a photo of any monument and hear the story behind it.
+          </motion.p>
+        </div>
+
+        {/* Primary CTA */}
+        <div className="absolute bottom-8 md:bottom-14 left-1/2 -translate-x-1/2 z-10">
+          {isAuthenticated ? (
+            <motion.button
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
+              onClick={() => setShowUploadForm(true)}
+              className="flex items-center gap-3 bg-blue-600 hover:bg-blue-500 text-white text-base md:text-lg font-semibold px-6 py-3 md:px-8 md:py-4 rounded-full shadow-lg shadow-blue-900/50 focus:outline-none focus:ring-2 focus:ring-blue-400"
             >
-              📸
-            </button>
+              <span className="text-2xl" aria-hidden="true">📸</span>
+              Identify a Monument
+            </motion.button>
+          ) : (
+            <Link
+              to="/login"
+              className="flex items-center gap-3 bg-white/10 backdrop-blur border border-white/20 hover:bg-white/20 text-white text-base md:text-lg font-semibold px-6 py-3 md:px-8 md:py-4 rounded-full shadow-lg transition-colors"
+            >
+              <span className="text-2xl" aria-hidden="true">🔑</span>
+              Login to start exploring
+            </Link>
           )}
         </div>
-      </div>
 
-      {/* Upload Form */}
-      {showUploadForm && (
-        <div className="fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center p-4">
-          <UploadForm
-            closeForm={() => setShowUploadForm(false)}
-            onResponse={handleResponse}
-            onAudioEnd={clearTranslatedText}
-          />
-        </div>
-      )}
+        {/* Guidance result panel */}
+        <AnimatePresence>
+          {translatedText && (
+            <motion.div
+              initial={{ opacity: 0, x: -40 }}
+              animate={{ opacity: 1, x: 0 }}
+              exit={{ opacity: 0, x: -40 }}
+              transition={{ duration: 0.4 }}
+              className="absolute left-4 right-4 md:left-6 md:right-auto top-24 md:top-1/4 md:w-96 bg-gray-900/85 backdrop-blur-md text-white p-5 rounded-2xl border border-white/10 shadow-2xl z-20"
+            >
+              <div className="flex items-center justify-between mb-3">
+                <h2 className="text-lg font-bold text-amber-400">📖 Guidance</h2>
+                <button
+                  onClick={closeResult}
+                  aria-label="Close guidance"
+                  className="text-gray-400 hover:text-white transition-colors text-xl leading-none"
+                >
+                  &times;
+                </button>
+              </div>
+              <p className="text-sm md:text-base text-gray-200 overflow-y-auto max-h-64 leading-relaxed">
+                {translatedText}
+              </p>
+              <button
+                onClick={replayAudio}
+                className="mt-4 flex items-center gap-2 text-sm bg-white/10 hover:bg-white/20 px-4 py-2 rounded-lg transition-colors"
+              >
+                <span aria-hidden="true">🔊</span> Replay audio
+              </button>
+            </motion.div>
+          )}
+        </AnimatePresence>
+
+        {/* Processing overlay */}
+        <AnimatePresence>
+          {isProcessing && (
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              className="fixed inset-0 z-40 bg-black/70 backdrop-blur-sm flex flex-col items-center justify-center gap-4"
+            >
+              <div className="w-14 h-14 border-4 border-blue-500 border-t-transparent rounded-full animate-spin" />
+              <p className="text-white text-lg font-medium">Uncovering the story…</p>
+              <p className="text-gray-400 text-sm">Analyzing your photo, this can take a few seconds</p>
+            </motion.div>
+          )}
+        </AnimatePresence>
+
+        {/* Error toast */}
+        <AnimatePresence>
+          {error && (
+            <motion.div
+              initial={{ opacity: 0, y: -20 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -20 }}
+              className="fixed top-20 left-1/2 -translate-x-1/2 z-50 bg-red-600/95 text-white px-5 py-3 rounded-xl shadow-lg flex items-center gap-4 max-w-md"
+            >
+              <span className="text-sm">{error}</span>
+              <button
+                onClick={() => setError('')}
+                aria-label="Dismiss error"
+                className="text-white/80 hover:text-white text-xl leading-none"
+              >
+                &times;
+              </button>
+            </motion.div>
+          )}
+        </AnimatePresence>
+      </main>
+
+      {/* Upload modal */}
+      <AnimatePresence>
+        {showUploadForm && (
+          <div className="fixed inset-0 z-50 bg-black/70 backdrop-blur-sm flex items-center justify-center p-4">
+            <UploadForm
+              closeForm={() => setShowUploadForm(false)}
+              onSubmitStart={() => {
+                setError('');
+                closeResult();
+                setIsProcessing(true);
+              }}
+              onResult={handleResult}
+              onError={handleError}
+            />
+          </div>
+        )}
+      </AnimatePresence>
 
       <Footer />
     </div>
@@ -69,52 +207,3 @@ const HomePage = () => {
 };
 
 export default HomePage;
-
-
-// return (
-//   <div className="bg-darkBg min-h-screen flex flex-col justify-between">
-//     <Header />
-
-//     <div className="relative h-full flex">
-//       {/* Left Panel for Translated Text */}
-//       {translatedText && (
-//         <div className="absolute left-20 top-1/4 w-1/4 bg-gray-600/25 text-white p-4 border-r border-gray-700 flex flex-col justify-center items-center z-50">
-//           <h2 className="text-lg font-bold mb-4">Guidance</h2>
-//           <p className="text-base text-gray-300 overflow-y-auto max-h-[80%] text-center">
-//             {translatedText}
-//           </p>
-//         </div>
-//       )}
-
-//       {/* Globe */}
-//       <div className="flex-1 relative flex items-center justify-center">
-//         <Globe />
-//         {isAuthenticated && (
-//           <button
-//             onClick={handleCameraClick}
-            
-//             className="absolute bottom-12 left-2/2 text-4xl bg-gray-600/50 text-white px-6 py-3 rounded-full shadow-lg hover:bg-blue-500 focus:outline-none"
-//           >
-//             📸
-//           </button>
-//         )}
-//       </div>
-//     </div>
-
-//     {/* Upload Form */}
-//     {showUploadForm && (
-//       <div className="fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center">
-//         <UploadForm
-//           closeForm={() => setShowUploadForm(false)}
-//           onResponse={handleResponse}
-//           onAudioEnd={clearTranslatedText}
-//         />
-//       </div>
-//     )}
-
-//     <Footer />
-//   </div>
-// );
-// };
-
-  
