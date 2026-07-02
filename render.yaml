@@ -1,13 +1,18 @@
 services:
   - type: web
     name: guide-mitra-py
-    env: python
-    rootDir: Backend/backend
-    pythonVersion: 3.11.9
+    runtime: python
+    rootDir: "Django Backend/backend"
     buildCommand: pip install -r requirements.txt && python manage.py collectstatic --noinput
     startCommand: gunicorn backend.wsgi
     autoDeploy: true
     plan: free
     envVars:
-      - key: PORT
-        value: 10000
+      - key: PYTHON_VERSION
+        value: 3.11.9
+      - key: DEBUG
+        value: "False"
+      - key: SECRET_KEY
+        generateValue: true
+      - key: GEMINI_API
+        sync: false

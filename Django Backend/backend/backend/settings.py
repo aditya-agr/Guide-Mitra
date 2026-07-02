@@ -10,6 +10,7 @@ For the full list of settings and their values, see
 https://docs.djangoproject.com/en/5.1/ref/settings/
 """
 
+import os
 from pathlib import Path
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
@@ -20,12 +21,20 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # See https://docs.djangoproject.com/en/5.1/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'django-insecure-acn@ku$h*&y@l0%d9xeyd3x!vzgb2g$jl4npy7fc92zk5_+#2h'
+SECRET_KEY = os.getenv(
+    'SECRET_KEY',
+    'django-insecure-acn@ku$h*&y@l0%d9xeyd3x!vzgb2g$jl4npy7fc92zk5_+#2h'  # dev fallback only
+)
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = os.getenv('DEBUG', 'True').lower() == 'true'
 
 ALLOWED_HOSTS = ['guide-mitra-py.onrender.com', 'guide-mitra-production.up.railway.app', 'localhost']
+
+# Render sets this automatically for every web service
+RENDER_EXTERNAL_HOSTNAME = os.getenv('RENDER_EXTERNAL_HOSTNAME')
+if RENDER_EXTERNAL_HOSTNAME and RENDER_EXTERNAL_HOSTNAME not in ALLOWED_HOSTS:
+    ALLOWED_HOSTS.append(RENDER_EXTERNAL_HOSTNAME)
 CSRF_TRUSTED_ORIGINS = [
     "https://guide-mitra-py.onrender.com",
     "https://guide-mitra-production.up.railway.app",
