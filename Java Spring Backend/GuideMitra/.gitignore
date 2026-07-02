@@ -3,6 +3,9 @@
 
 # Maven
 target/
+
+# IDE build output (VS Code / Eclipse)
+bin/
 !.mvn/wrapper/maven-wrapper.jar
 !**/src/main/**/target/
 !**/src/test/**/target/
